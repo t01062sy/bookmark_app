@@ -11,7 +11,7 @@ WORKSPACE_NAME="${PROJECT_NAME}.xcworkspace"
 PROJECT_FILE="${PROJECT_NAME}.xcodeproj"
 SCHEME_NAME="BookmarkApp"
 SIMULATOR_NAME="iPhone 15 Pro"
-SIMULATOR_OS="iOS 17.5"
+SIMULATOR_OS=""
 
 cd "$PROJECT_DIR"
 
@@ -34,10 +34,10 @@ else
 fi
 
 # Get simulator device ID
-SIMULATOR_ID=$(xcrun simctl list devices available | grep "$SIMULATOR_NAME" | grep "$SIMULATOR_OS" | head -1 | sed 's/.*(\(.*\)).*/\1/')
+SIMULATOR_ID=$(xcrun simctl list devices available | grep "$SIMULATOR_NAME" | head -1 | sed 's/.*(\(.*\)).*/\1/')
 
 if [ -z "$SIMULATOR_ID" ]; then
-    echo "❌ Simulator not found: $SIMULATOR_NAME ($SIMULATOR_OS)"
+    echo "❌ Simulator not found: $SIMULATOR_NAME"
     echo "Available simulators:"
     xcrun simctl list devices available | grep "iPhone"
     exit 1
