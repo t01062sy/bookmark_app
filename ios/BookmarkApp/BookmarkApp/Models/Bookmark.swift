@@ -5,12 +5,13 @@ import SwiftUI
 @Model
 final class Bookmark {
     var id: String
+    var remoteId: String? // Supabase側のUUID
     var url: String
     var canonicalUrl: String?
     var domain: String
     var sourceType: SourceType
     var titleRaw: String?
-    var titleFinal: String
+    var title: String // titleFinal から title に簡素化
     var summary: String
     var tags: [String]
     var category: BookmarkCategory
@@ -18,46 +19,42 @@ final class Bookmark {
     var createdAt: Date
     var updatedAt: Date
     var readAt: Date?
-    var pinned: Bool
-    var archived: Bool
+    var isRead: Bool // computed property から stored property に変更
+    var isPinned: Bool // pinned から isPinned に変更
+    var isArchived: Bool // archived から isArchived に変更
     var llmStatus: LLMStatus
     
     init(
-        id: String = UUID().uuidString,
         url: String,
-        canonicalUrl: String? = nil,
-        domain: String,
-        sourceType: SourceType = .other,
-        titleRaw: String? = nil,
-        titleFinal: String,
+        title: String,
         summary: String = "",
-        tags: [String] = [],
         category: BookmarkCategory = .other,
-        contentText: String? = nil,
-        createdAt: Date = Date(),
-        updatedAt: Date = Date(),
-        readAt: Date? = nil,
-        pinned: Bool = false,
-        archived: Bool = false,
-        llmStatus: LLMStatus = .queued
+        sourceType: SourceType = .other,
+        tags: [String] = [],
+        isRead: Bool = false,
+        isPinned: Bool = false,
+        isArchived: Bool = false,
+        createdAt: Date = Date()
     ) {
-        self.id = id
+        self.id = UUID().uuidString
+        self.remoteId = nil
         self.url = url
-        self.canonicalUrl = canonicalUrl
-        self.domain = domain
+        self.canonicalUrl = nil
+        self.domain = URL(string: url)?.host?.replacingOccurrences(of: "www.", with: "") ?? "unknown"
         self.sourceType = sourceType
-        self.titleRaw = titleRaw
-        self.titleFinal = titleFinal
+        self.titleRaw = nil
+        self.title = title
         self.summary = summary
         self.tags = tags
         self.category = category
-        self.contentText = contentText
+        self.contentText = nil
         self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.readAt = readAt
-        self.pinned = pinned
-        self.archived = archived
-        self.llmStatus = llmStatus
+        self.updatedAt = Date()
+        self.readAt = isRead ? Date() : nil
+        self.isRead = isRead
+        self.isPinned = isPinned
+        self.isArchived = isArchived
+        self.llmStatus = .queued
     }
 }
 
@@ -92,16 +89,31 @@ enum SourceType: String, CaseIterable, Codable {
 }
 
 enum BookmarkCategory: String, CaseIterable, Codable {
-    case tech = "技術記事"
-    case news = "ニュース"
-    case blog = "ブログ"
-    case video = "動画"
-    case social = "ソーシャル"
-    case academic = "学術論文"
-    case product = "商品・サービス"
-    case entertainment = "エンターテインメント"
-    case lifestyle = "ライフスタイル"
-    case other = "その他"
+    case tech = "tech"
+    case news = "news"
+    case blog = "blog"
+    case video = "video"
+    case social = "social"
+    case academic = "academic"
+    case product = "product"
+    case entertainment = "entertainment"
+    case lifestyle = "lifestyle"
+    case other = "other"
+    
+    var displayName: String {
+        switch self {
+        case .tech: return "技術記事"
+        case .news: return "ニュース"
+        case .blog: return "ブログ"
+        case .video: return "動画"
+        case .social: return "ソーシャル"
+        case .academic: return "学術論文"
+        case .product: return "商品・サービス"
+        case .entertainment: return "エンターテインメント"
+        case .lifestyle: return "ライフスタイル"
+        case .other: return "その他"
+        }
+    }
     
     var color: Color {
         switch self {

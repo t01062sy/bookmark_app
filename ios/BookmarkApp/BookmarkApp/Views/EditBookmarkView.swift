@@ -11,7 +11,7 @@ struct EditBookmarkView: View {
     
     init(bookmark: Bookmark) {
         self.bookmark = bookmark
-        self._editedTitle = State(initialValue: bookmark.titleFinal)
+        self._editedTitle = State(initialValue: bookmark.title)
         self._editedSummary = State(initialValue: bookmark.summary)
         self._editedTags = State(initialValue: bookmark.tags.joined(separator: ", "))
         self._editedCategory = State(initialValue: bookmark.category)
@@ -39,7 +39,7 @@ struct EditBookmarkView: View {
                 Section("分類") {
                     Picker("カテゴリ", selection: $editedCategory) {
                         ForEach(BookmarkCategory.allCases, id: \.self) { category in
-                            Text(category.rawValue).tag(category)
+                            Text(category.displayName).tag(category)
                         }
                     }
                     .pickerStyle(.menu)
@@ -100,7 +100,7 @@ struct EditBookmarkView: View {
     }
     
     private func saveChanges() {
-        bookmark.titleFinal = editedTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        bookmark.title = editedTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         bookmark.summary = editedSummary.trimmingCharacters(in: .whitespacesAndNewlines)
         bookmark.category = editedCategory
         

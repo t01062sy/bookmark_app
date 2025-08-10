@@ -33,15 +33,15 @@ struct BookmarkDetailView: View {
                 Menu {
                     Button(action: { togglePin() }) {
                         Label(
-                            bookmark.pinned ? "ピン留めを解除" : "ピン留めする",
-                            systemImage: bookmark.pinned ? "pin.slash" : "pin"
+                            bookmark.isPinned ? "ピン留めを解除" : "ピン留めする",
+                            systemImage: bookmark.isPinned ? "pin.slash" : "pin"
                         )
                     }
                     
                     Button(action: { markAsRead() }) {
                         Label(
-                            bookmark.readAt == nil ? "既読にする" : "未読にする",
-                            systemImage: bookmark.readAt == nil ? "checkmark" : "circle"
+                            bookmark.isRead ? "未読にする" : "既読にする",
+                            systemImage: bookmark.isRead ? "circle" : "checkmark"
                         )
                     }
                     
@@ -87,7 +87,7 @@ struct BookmarkDetailView: View {
                 
                 Spacer()
                 
-                if bookmark.pinned {
+                if bookmark.isPinned {
                     Image(systemName: "pin.fill")
                         .foregroundColor(.orange)
                 }
@@ -120,7 +120,7 @@ struct BookmarkDetailView: View {
     private var contentSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             // タイトル
-            Text(bookmark.titleFinal)
+            Text(bookmark.title)
                 .font(.title2)
                 .fontWeight(.bold)
                 .lineLimit(nil)
@@ -177,7 +177,7 @@ struct BookmarkDetailView: View {
                 
                 Spacer()
                 
-                Text(bookmark.category.rawValue)
+                Text(bookmark.category.displayName)
                     .font(.caption)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 4)
@@ -267,12 +267,13 @@ struct BookmarkDetailView: View {
     }
     
     private func togglePin() {
-        bookmark.pinned.toggle()
+        bookmark.isPinned.toggle()
         bookmark.updatedAt = Date()
     }
     
     private func markAsRead() {
-        if bookmark.readAt == nil {
+        bookmark.isRead.toggle()
+        if bookmark.isRead {
             bookmark.readAt = Date()
         } else {
             bookmark.readAt = nil
@@ -281,7 +282,7 @@ struct BookmarkDetailView: View {
     }
     
     private func archiveBookmark() {
-        bookmark.archived = true
+        bookmark.isArchived = true
         bookmark.updatedAt = Date()
     }
     

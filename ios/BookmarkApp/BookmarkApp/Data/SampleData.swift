@@ -215,23 +215,19 @@ struct BookmarkData {
     func toBookmark() -> Bookmark {
         return Bookmark(
             url: url,
-            canonicalUrl: url,
-            domain: domain,
-            sourceType: sourceType,
-            titleRaw: titleFinal,
-            titleFinal: titleFinal,
+            title: titleFinal,
             summary: summary,
-            tags: tags,
             category: category,
+            sourceType: sourceType,
+            tags: tags,
+            isRead: readAt != nil,
+            isPinned: pinned,
+            isArchived: archived,
             createdAt: Calendar.current.date(
                 byAdding: .day,
                 value: -Int.random(in: 0...30),
                 to: Date()
-            ) ?? Date(),
-            readAt: readAt,
-            pinned: pinned,
-            archived: archived,
-            llmStatus: llmStatus
+            ) ?? Date()
         )
     }
 }
