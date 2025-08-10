@@ -78,8 +78,10 @@ temp/
 
 # API Keys and sensitive data
 .env.*
+.secrets*
 secrets.*
 config/secrets.*
+backups/secrets/
 *.pem
 *.key
 !*.key.example
