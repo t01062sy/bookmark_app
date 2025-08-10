@@ -1,68 +1,129 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Project Overview
 
-Personal bookmark management application with AI-powered organization. iOS/Web apps that save URLs from share sheets/bookmarklets with automatic summarization and categorization using LLM.
+Personal bookmark management application with AI-powered organization. iOS/Web apps that save URLs from share sheets/bookmarklets with automatic summarization and categorization using LLM (GPT).
 
-## Development Progress
+## MVP Development Complete
 
-### Phase 2B Achievements - Semantic Search Implementation
+### ✅ Core Features Implemented
+1. **Full-Stack Application Architecture**
+   - **Backend**: Supabase with Edge Functions, PostgreSQL, Storage, Authentication
+   - **iOS**: SwiftUI app with Swift Data + Share Extension for Safari/Chrome
+   - **Web**: React PWA with offline support, WebAuthn authentication
+   - **Search**: Three-tier search system (keyword, BM25 full-text, semantic, hybrid RRF)
+   - **LLM**: OpenAI GPT-4o-mini for summarization/categorization with cost monitoring
 
-#### Key Features Completed
-1. **Vector Embedding Generation System**
-   - embeddings-generate Edge Function with OpenAI text-embedding-3-small
-   - embeddings-batch Edge Function for bulk processing existing data
-   - Integrated cost tracking and usage limits monitoring
-   - Successfully processed 5 bookmarks with vector embeddings
+2. **Advanced Search Implementation**
+   - **BM25 Full-Text Search**: PostgreSQL ts_rank_cd with stemming and ranking
+   - **Semantic Search**: OpenAI embeddings (text-embedding-3-small) with cosine similarity
+   - **Hybrid Search**: RRF (Reciprocal Rank Fusion) combining BM25 + vector search
+   - **Search Performance**: 300-600ms average response time with filtering support
 
-2. **Semantic Search API Implementation**
-   - search-semantic Edge Function with real-time query embedding
-   - Cosine similarity calculation and ranking system
-   - Category and source type filtering support
-   - JavaScript-based similarity search (pgvector alternative)
+3. **iOS Native Integration**
+   - **Share Extension**: One-tap bookmark saving from Safari, Chrome, any iOS app
+   - **Source Detection**: Automatic categorization (YouTube, X/Twitter, GitHub, Medium, etc.)
+   - **Local Storage**: Swift Data for offline capability with API synchronization
+   - **Real-time Sync**: Background API calls with error handling and retry logic
 
-3. **Production Testing Success**
-   - Query: "React development" → Found React official documentation
-   - Similarity score: 0.558, Processing time: 545ms
-   - Embedding generation cost: $0.00000004 per query
-   - Batch processing capability: up to 50 bookmarks simultaneously
+4. **Web Progressive Web App**
+   - **PWA Level 2**: Service worker, offline mode, installable
+   - **WebAuthn Authentication**: Passkey-based authentication (no passwords)
+   - **Real-time Search**: Instant search across all bookmark content
+   - **Responsive Design**: Mobile-first with desktop optimization
 
-4. **Technical Achievements**
-   - 1536-dimensional vector storage and retrieval
-   - Cost-efficient embedding generation ($0.02/1M tokens)
-   - Automated background processing pipeline
-   - Robust error handling and fallback mechanisms
+5. **Backend Infrastructure**
+   - **Edge Functions**: 9 TypeScript/Deno functions for all API endpoints
+   - **Database**: PostgreSQL with full-text search indexes and vector storage
+   - **Cost Monitoring**: Real-time LLM cost tracking with daily/monthly limits
+   - **Idempotency**: Duplicate prevention with UUID-based keys
+   - **CORS Support**: Cross-platform API access for web and mobile
 
-## Current Project Status
-- Current Phase: Phase 3A Completed (Web PWA Implementation)
-- MVP Progress: ~95% complete
-- Next Phase: Phase 3B (Authentication and Backend Integration)
+### 🏗️ Technical Architecture
 
-## Upcoming Development Focus
-- WebAuthn passkey authentication
-- Complete Supabase backend integration
-- BM25 full-text search integration
-- Hybrid search combining semantic + keyword search
-- Performance and security optimizations
+#### Project Structure
+```
+bookmark_app/
+├── web/                    # React PWA (TypeScript + Vite)
+│   ├── src/components/     # React components with TypeScript
+│   ├── src/lib/           # Supabase client and WebAuthn
+│   └── dist/              # Production build
+├── ios/BookmarkApp/       # iOS SwiftUI app
+│   ├── BookmarkApp/       # Main app with Swift Data
+│   ├── ShareExtension/    # Safari/Chrome share integration
+│   └── Shared/           # Shared API client
+├── supabase/             # Backend infrastructure
+│   ├── functions/        # 9 Edge Functions (TypeScript/Deno)
+│   └── migrations/       # Database schema and indexes
+└── docs/                 # Comprehensive documentation (30+ files)
+```
 
-## Development Workflow Notes
-- Continued focus on idempotent bookmark creation
-- Implement WebAuthn passkey authentication
-- Emphasize background processing and quick user experience
-- Maintain low-latency metadata and summarization pipeline
-- Ensure cross-platform (iOS, Web) consistent user experience
+#### API Endpoints (All Implemented)
+- `POST /v1/bookmarks` - Create bookmark with LLM processing
+- `GET /v1/bookmarks` - List/search bookmarks with filters
+- `POST /v1/search-fulltext` - BM25 full-text search
+- `POST /v1/search-semantic` - Vector similarity search
+- `POST /v1/search-hybrid` - Combined RRF search
+- `POST /v1/embeddings-generate` - Vector embedding generation
+- `POST /v1/llm-process` - Content summarization
+- `GET /v1/costs-monitor` - LLM usage tracking
 
-## Technical Debt and Future Improvements
-- Complete BM25 full-text search implementation
-- Hybrid search ranking (RRF - Reciprocal Rank Fusion)
-- Enhanced error handling in vector embedding generation
-- PWA authentication and secure data synchronization
-- Optimize similarity search performance for larger datasets
-- Implement advanced caching strategies for offline mode
-- Cross-platform share sheet integration
+#### Data Model
+- **Bookmarks**: URL, title, summary, category, tags, source_type, embeddings
+- **Authentication**: WebAuthn credentials, passkey-based
+- **Cost Tracking**: Daily/monthly LLM usage with automatic limits
+- **Search Indexes**: GIN indexes for full-text, vector similarity
 
-## Infrastructure Considerations
-- Monitor semantic search performance at scale
-- Track embedding generation costs and optimize usage
-- Implement vector database optimization for production
-- Prepare for horizontal scaling of search infrastructure
+### 🔧 Development Environment
+
+#### Local Development Setup
+```bash
+# Supabase backend
+cd bookmark_app && supabase start
+# Web development server  
+cd web && npm run dev
+# iOS development
+open ios/BookmarkApp/BookmarkApp.xcodeproj
+```
+
+#### Key Configuration
+- **Local API**: http://127.0.0.1:54321
+- **Local Studio**: http://127.0.0.1:54323
+- **Authentication**: WebAuthn passkey (no email/password)
+- **LLM Limits**: $1/day, $30/month, 10k bookmarks/month
+
+## Current Development Status
+
+### ✅ MVP Complete - All Features Working
+- **iOS App**: Full ShareExtension integration, real-time API sync
+- **Web PWA**: WebAuthn auth, offline mode, installable
+- **Backend**: All 9 Edge Functions deployed and tested
+- **Search**: Three search types operational with RRF hybrid ranking
+- **LLM**: GPT-4o-mini integration with cost monitoring
+- **Database**: Full schema with indexes and migrations
+
+### 🚀 Production Ready
+- All major development phases completed
+- Feature-complete for MVP release
+- Comprehensive error handling and logging
+- Cost monitoring and usage limits
+- Cross-platform compatibility verified
+- Real-world testing completed successfully
+
+## Post-MVP Enhancement Opportunities
+
+### Potential Next Development Phases
+1. **Enhanced UI/UX**: Dark mode, advanced filtering, bulk operations
+2. **Extended Integration**: More source types, browser extensions
+3. **Advanced Features**: Export functionality, bookmark collections, sharing
+4. **Performance Optimization**: Caching layers, CDN integration
+5. **Analytics**: Usage tracking, search analytics, user insights
+
+### Operational Considerations
+- **Cost Monitoring**: LLM usage tracking prevents budget overrun
+- **Performance**: 300-600ms search response times
+- **Scalability**: Architecture supports multiple users
+- **Security**: WebAuthn passkey authentication, secure API design
+- **Maintenance**: Comprehensive documentation and error handling

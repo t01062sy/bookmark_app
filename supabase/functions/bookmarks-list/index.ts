@@ -134,7 +134,7 @@ serve(async (req) => {
     // Transform data for response
     const transformedBookmarks = bookmarks?.map(bookmark => ({
       ...bookmark,
-      tags: JSON.parse(bookmark.tags || '[]')
+      tags: Array.isArray(bookmark.tags) ? bookmark.tags : JSON.parse(bookmark.tags || '[]')
     })) || []
 
     // Get total count for pagination metadata

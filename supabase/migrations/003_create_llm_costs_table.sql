@@ -1,14 +1,7 @@
 -- Create llm_costs table for tracking OpenAI API usage and costs
 -- Phase 2A Week 3: Cost monitoring system
 
--- Create enum for LLM models
-CREATE TYPE llm_model_type AS ENUM (
-  'gpt-4o-mini',
-  'gpt-4o',
-  'gpt-3.5-turbo',
-  'text-embedding-3-small',
-  'text-embedding-3-large'
-);
+-- llm_model_type enum is already created in 001_create_bookmarks_table.sql
 
 -- Create table for tracking LLM costs
 CREATE TABLE IF NOT EXISTS llm_costs (
@@ -30,7 +23,6 @@ CREATE TABLE IF NOT EXISTS llm_costs (
 CREATE INDEX idx_llm_costs_created_at ON llm_costs(created_at DESC);
 CREATE INDEX idx_llm_costs_bookmark_id ON llm_costs(bookmark_id);
 CREATE INDEX idx_llm_costs_model ON llm_costs(model);
-CREATE INDEX idx_llm_costs_daily ON llm_costs(DATE(created_at));
 
 -- Create view for daily cost aggregation
 CREATE OR REPLACE VIEW daily_llm_costs AS

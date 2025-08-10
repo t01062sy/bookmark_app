@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="j1y-V4-xli">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Share View Controller-->
+        <scene sceneID="ceB-am-kn3">
+            <objects>
+                <viewController id="j1y-V4-xli" customClass="ShareViewController" customModule="ShareExtension" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" opaque="NO" contentMode="scaleToFill" id="wbc-yd-nQP">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <navigationBar contentMode="scaleToFill" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NOA-Dm-cuz">
+                                <rect key="frame" x="0.0" y="59" width="393" height="44"/>
+                                <items>
+                                    <navigationItem title="Add Bookmark" id="3HJ-uW-3hn">
+                                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="bbD-fL-HDo">
+                                            <connections>
+                                                <action selector="cancel" destination="j1y-V4-xli" id="qrt-dC-c3H"/>
+                                            </connections>
+                                        </barButtonItem>
+                                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="7Ky-oG-WGr">
+                                            <connections>
+                                                <action selector="save" destination="j1y-V4-xli" id="Nlc-dc-9gJ"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
+                                </items>
+                            </navigationBar>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GcN-lo-r7D">
+                                <rect key="frame" x="20" y="123" width="353" height="675"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Saving bookmark..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZKw-Rq-DCF">
+                                        <rect key="frame" x="20" y="327" width="313" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="hti-Ly-u7C">
+                                        <rect key="frame" x="166.66666666666666" y="287" width="20" height="20"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="hti-Ly-u7C" firstAttribute="centerX" secondItem="GcN-lo-r7D" secondAttribute="centerX" id="7cV-Nb-jIx"/>
+                                    <constraint firstItem="ZKw-Rq-DCF" firstAttribute="leading" secondItem="GcN-lo-r7D" secondAttribute="leading" constant="20" id="FQA-eG-Tvl"/>
+                                    <constraint firstItem="ZKw-Rq-DCF" firstAttribute="top" secondItem="hti-Ly-u7C" secondAttribute="bottom" constant="20" id="Gwg-8L-9pX"/>
+                                    <constraint firstAttribute="trailing" secondItem="ZKw-Rq-DCF" secondAttribute="trailing" constant="20" id="HEP-us-Bvg"/>
+                                    <constraint firstItem="hti-Ly-u7C" firstAttribute="centerY" secondItem="GcN-lo-r7D" secondAttribute="centerY" id="tgp-6f-PIN"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="GcN-lo-r7D" firstAttribute="top" secondItem="NOA-Dm-cuz" secondAttribute="bottom" constant="20" id="4Xs-ka-WAT"/>
+                            <constraint firstItem="NOA-Dm-cuz" firstAttribute="leading" secondItem="wbc-yd-nQP" secondAttribute="leading" id="H5L-Kc-Fi5"/>
+                            <constraint firstItem="GcN-lo-r7D" firstAttribute="leading" secondItem="Fdn-P0-HAW" secondAttribute="leading" constant="20" id="JxY-97-pzf"/>
+                            <constraint firstItem="Fdn-P0-HAW" firstAttribute="trailing" secondItem="NOA-Dm-cuz" secondAttribute="trailing" id="Kma-8h-wng"/>
+                            <constraint firstItem="NOA-Dm-cuz" firstAttribute="top" secondItem="Fdn-P0-HAW" secondAttribute="top" id="LxT-hi-BhX"/>
+                            <constraint firstItem="Fdn-P0-HAW" firstAttribute="trailing" secondItem="GcN-lo-r7D" secondAttribute="trailing" constant="20" id="gz6-RB-sWz"/>
+                            <constraint firstItem="Fdn-P0-HAW" firstAttribute="bottom" secondItem="GcN-lo-r7D" secondAttribute="bottom" constant="20" id="rOw-1z-esU"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="Fdn-P0-HAW"/>
+                    </view>
+                    <connections>
+                        <outlet property="activityIndicator" destination="hti-Ly-u7C" id="tkf-dH-8vl"/>
+                        <outlet property="statusLabel" destination="ZKw-Rq-DCF" id="FbY-Zy-cYv"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="CEy-Cv-SGf" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="132" y="154"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
