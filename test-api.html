@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark API テスト</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .add-form {
+            margin-top: 20px;
+        }
+        input {
+            width: 400px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .results {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .bookmark {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .bookmark:last-child {
+            border-bottom: none;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .url {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .summary {
+            color: #555;
+            margin: 10px 0;
+        }
+        .meta {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #888;
+        }
+        .tags {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.done { background: #c8e6c9; color: #2e7d32; }
+        .status.queued { background: #fff3cd; color: #856404; }
+        .status.processing { background: #cfe2ff; color: #0a58ca; }
+        .status.failed { background: #f8d7da; color: #721c24; }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔖 Bookmark API テストページ</h1>
+    
+    <div class="controls">
+        <button onclick="fetchBookmarks()">ブックマーク一覧を取得</button>
+        <button onclick="fetchCosts()">コスト情報を取得</button>
+        
+        <div class="add-form">
+            <input type="url" id="urlInput" placeholder="URLを入力 (例: https://example.com)">
+            <button onclick="addBookmark()">ブックマークを追加</button>
+        </div>
+    </div>
+    
+    <div id="results" class="results">
+        <div class="loading">ボタンをクリックしてデータを取得してください</div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://ieuurvmlrgkxfetfnlnp.supabase.co/functions/v1';
+        const AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlldXVydm1scmdreGZldGZubG5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MDkyNTksImV4cCI6MjA3MDM4NTI1OX0.VPYLmJsdgnLvSBZNmAaDbod3ecWbTtIc0fDneGvgO-E';
+
+        async function fetchBookmarks() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading">読み込み中...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/bookmarks-list`, {
+                    headers: {
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                if (data.data && data.data.length > 0) {
+                    resultsDiv.innerHTML = '<h2>ブックマーク一覧</h2>' + 
+                        data.data.map(bookmark => `
+                            <div class="bookmark">
+                                <div class="title">${bookmark.title_final || bookmark.url}</div>
+                                <div class="url">${bookmark.url}</div>
+                                ${bookmark.summary ? `<div class="summary">${bookmark.summary}</div>` : ''}
+                                <div class="meta">
+                                    <span>カテゴリ: ${bookmark.category}</span>
+                                    <span>ソース: ${bookmark.source_type}</span>
+                                    <span class="status ${bookmark.llm_status}">LLM: ${bookmark.llm_status}</span>
+                                </div>
+                                ${bookmark.tags && bookmark.tags.length > 0 ? 
+                                    `<div class="tags">${bookmark.tags.map(tag => 
+                                        `<span class="tag">${tag}</span>`).join('')}</div>` : ''}
+                            </div>
+                        `).join('');
+                } else {
+                    resultsDiv.innerHTML = '<p>ブックマークがありません</p>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">エラー: ${error.message}</div>`;
+            }
+        }
+
+        async function fetchCosts() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading">読み込み中...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/costs-monitor`, {
+                    headers: {
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <h2>コスト情報</h2>
+                    <div class="bookmark">
+                        <h3>日次コスト</h3>
+                        <p>使用額: $${data.daily.total_cost_usd.toFixed(6)} / $${data.daily.limit_usd}</p>
+                        <p>使用率: ${data.daily.percentage_used.toFixed(1)}%</p>
+                        <p>リクエスト数: ${data.daily.request_count}</p>
+                    </div>
+                    <div class="bookmark">
+                        <h3>月次コスト</h3>
+                        <p>使用額: $${data.monthly.total_cost_usd.toFixed(6)} / $${data.monthly.limit_usd}</p>
+                        <p>使用率: ${data.monthly.percentage_used.toFixed(1)}%</p>
+                        <p>リクエスト数: ${data.monthly.request_count}</p>
+                    </div>
+                    <div class="bookmark">
+                        <h3>処理可能状態</h3>
+                        <p>${data.limits.can_process_new_request ? '✅ 新規処理可能' : '❌ 上限到達'}</p>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">エラー: ${error.message}</div>`;
+            }
+        }
+
+        async function addBookmark() {
+            const urlInput = document.getElementById('urlInput');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('URLを入力してください');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading">追加中...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/bookmarks-create`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${AUTH_TOKEN}`,
+                        'Content-Type': 'application/json',
+                        'idempotency-key': `web-test-${Date.now()}`
+                    },
+                    body: JSON.stringify({ url })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <div class="bookmark">
+                        <h3>✅ ブックマークを追加しました</h3>
+                        <div class="title">${data.title_final || data.url}</div>
+                        <div class="url">${data.url}</div>
+                        <div class="meta">
+                            <span>ID: ${data.id}</span>
+                            <span class="status ${data.llm_status}">LLM: ${data.llm_status}</span>
+                        </div>
+                        <p style="margin-top: 10px; color: #666;">
+                            バックグラウンドでLLM処理中です。しばらく待って一覧を更新してください。
+                        </p>
+                    </div>
+                `;
+                
+                urlInput.value = '';
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">エラー: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

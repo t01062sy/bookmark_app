@@ -6,47 +6,58 @@ Personal bookmark management application with AI-powered organization. iOS/Web a
 
 ## Development Progress
 
-### Phase 2A Week 2 Achievements
+### Phase 2B Achievements - Semantic Search Implementation
 
 #### Key Features Completed
-1. **URL Metadata Retrieval (url-metadata Edge Function)**
-   - Full support for OGP/oEmbed/HTML parsing
-   - Automatic detection and oEmbed retrieval for YouTube/Twitter
-   - Metadata and content extraction for general websites
+1. **Vector Embedding Generation System**
+   - embeddings-generate Edge Function with OpenAI text-embedding-3-small
+   - embeddings-batch Edge Function for bulk processing existing data
+   - Integrated cost tracking and usage limits monitoring
+   - Successfully processed 5 bookmarks with vector embeddings
 
-2. **Automated LLM Processing Integration (bookmarks-create enhancement)**
-   - Automatic metadata retrieval during bookmark save
-   - Background LLM processing (summarization, categorization, tagging)
-   - Fully automated processing pipeline
+2. **Semantic Search API Implementation**
+   - search-semantic Edge Function with real-time query embedding
+   - Cosine similarity calculation and ranking system
+   - Category and source type filtering support
+   - JavaScript-based similarity search (pgvector alternative)
 
-3. **Proof of Concept Testing**
-   - Successful testing with React official documentation (https://react.dev/learn)
-   - Metadata retrieval and LLM processing completed in ~10 seconds
-   - Automatic Japanese summary, category (tech), and tag generation
+3. **Production Testing Success**
+   - Query: "React development" → Found React official documentation
+   - Similarity score: 0.558, Processing time: 545ms
+   - Embedding generation cost: $0.00000004 per query
+   - Batch processing capability: up to 50 bookmarks simultaneously
+
+4. **Technical Achievements**
+   - 1536-dimensional vector storage and retrieval
+   - Cost-efficient embedding generation ($0.02/1M tokens)
+   - Automated background processing pipeline
+   - Robust error handling and fallback mechanisms
 
 ## Current Project Status
-- Current Phase: Phase 2A Week 2 Completed
-- MVP Progress: ~80% complete
-- Next Phase: Phase 2A Week 3 (Cost Monitoring and Optimization)
+- Current Phase: Phase 2B Completed (Advanced Search Features)
+- MVP Progress: ~90% complete
+- Next Phase: Phase 3A (Web PWA Implementation - React + TypeScript + PWA Level 2)
 
 ## Upcoming Development Focus
-- Performance optimization of LLM processing
-- Cost monitoring for AI services
-- Refine metadata extraction accuracy
-- Prepare for initial user testing
+- Web PWA development with React and TypeScript
+- PWA Level 2 implementation (offline support, push notifications)
+- BM25 full-text search integration (post-PWA basic implementation)
+- Hybrid search combining semantic + keyword search
 
 ## Development Workflow Notes
 - Continued focus on idempotent bookmark creation
 - Emphasize background processing and quick user experience
 - Maintain low-latency metadata and summarization pipeline
 
-## Technical Debt and Improvements
-- Enhance error handling in metadata retrieval
-- Implement more robust fallback mechanisms
-- Optimize LLM prompt engineering
-- Develop comprehensive logging for background processes
+## Technical Debt and Future Improvements
+- BM25 full-text search implementation for keyword-based queries
+- Hybrid search ranking (RRF - Reciprocal Rank Fusion)
+- Enhanced error handling in vector embedding generation
+- Optimize similarity search performance for larger datasets
+- Implement vector index optimization strategies
 
 ## Infrastructure Considerations
-- Monitor Supabase Edge Function performance
-- Track OpenAI API usage and costs
-- Prepare for potential LLM provider diversification
+- Monitor semantic search performance at scale
+- Track embedding generation costs and optimize usage
+- Implement vector database optimization for production
+- Prepare for horizontal scaling of search infrastructure

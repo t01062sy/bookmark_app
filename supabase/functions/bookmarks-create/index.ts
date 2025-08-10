@@ -1,5 +1,6 @@
 // POST /v1/bookmarks - ブックマーク保存API
 // Phase 1B Week 2: 基本保存機能実装
+// Phase 2A Week 2: URLメタデータ取得・LLM処理自動統合
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -16,6 +17,60 @@ interface ErrorResponse {
   error: string
   code: string
   details?: any
+}
+
+// URLメタデータを取得
+async function fetchUrlMetadata(url: string): Promise<any> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/url-metadata`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({ url })
+    })
+    
+    if (response.ok) {
+      return await response.json()
+    } else {
+      console.warn('URL metadata fetch failed:', response.status, response.statusText)
+      return null
+    }
+  } catch (error) {
+    console.warn('URL metadata fetch error:', error)
+    return null
+  }
+}
+
+// LLM処理を開始（バックグラウンド）
+async function startLLMProcessing(bookmarkId: string, url: string, title?: string, content?: string): Promise<void> {
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    
+    // バックグラウンドでLLM処理を開始（結果は待たない）
+    fetch(`${supabaseUrl}/functions/v1/llm-process`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({
+        bookmark_id: bookmarkId,
+        url: url,
+        title: title,
+        content: content
+      })
+    }).catch(error => {
+      console.error('Background LLM processing failed:', error)
+    })
+  } catch (error) {
+    console.error('Failed to start LLM processing:', error)
+  }
 }
 
 serve(async (req) => {
@@ -125,15 +180,36 @@ serve(async (req) => {
       )
     }
 
-    // Create new bookmark
+    // Fetch URL metadata for enhanced information
+    let metadata = null
+    try {
+      metadata = await fetchUrlMetadata(payload.url)
+    } catch (error) {
+      console.warn('Metadata fetch failed, continuing without metadata:', error)
+    }
+
+    // Create new bookmark with metadata
     const bookmarkData = {
       url: payload.url,
+      canonical_url: metadata?.canonical_url || payload.url,
       domain: domain,
       source_type: sourceType,
-      title_final: payload.title || parsedUrl.pathname.split('/').pop() || domain,
+      title_raw: metadata?.title || null,
+      title_final: payload.title || metadata?.title || parsedUrl.pathname.split('/').pop() || domain,
+      summary: metadata?.description || '',
       tags: JSON.stringify(payload.tags || []),
       category: payload.category || 'other',
+      content_text: metadata?.content_text || null,
       llm_status: 'queued' as const,
+      media_meta: JSON.stringify({
+        image: metadata?.image,
+        video: metadata?.video,
+        favicon: metadata?.favicon,
+        site_name: metadata?.site_name,
+        type: metadata?.type,
+        author: metadata?.author,
+        published_time: metadata?.published_time
+      }),
       captured_at: new Date().toISOString()
     }
 
@@ -159,6 +235,21 @@ serve(async (req) => {
           key: idempotencyKey,
           bookmark_id: newBookmark.id
         })
+    }
+
+    // Start background LLM processing
+    if (newBookmark?.id) {
+      try {
+        await startLLMProcessing(
+          newBookmark.id,
+          payload.url,
+          bookmarkData.title_final,
+          bookmarkData.content_text
+        )
+        console.log('Background LLM processing started for bookmark:', newBookmark.id)
+      } catch (error) {
+        console.warn('Failed to start LLM processing:', error)
+      }
     }
 
     return new Response(

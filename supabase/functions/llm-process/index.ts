@@ -27,11 +27,30 @@ interface ErrorResponse {
   details?: any
 }
 
-// OpenAI API call function
+// Calculate cost based on model and tokens
+function calculateCost(model: string, promptTokens: number, completionTokens: number): number {
+  // Pricing as of 2025-08 (per 1M tokens)
+  // GPT-4o-mini: $0.15 input, $0.60 output per 1M tokens
+  const costs: Record<string, { input: number, output: number }> = {
+    'gpt-4o-mini': { input: 0.00000015, output: 0.00000060 },
+    'gpt-4o': { input: 0.00000250, output: 0.00001000 },
+    'gpt-3.5-turbo': { input: 0.00000050, output: 0.00000150 }
+  }
+  
+  const modelCost = costs[model] || costs['gpt-4o-mini']
+  return (promptTokens * modelCost.input) + (completionTokens * modelCost.output)
+}
+
+// OpenAI API call function with cost tracking
 async function callOpenAI(content: string, title: string, url: string): Promise<{
   summary: string,
   category: string,
-  tags: string[]
+  tags: string[],
+  usage?: {
+    prompt_tokens: number,
+    completion_tokens: number,
+    total_tokens: number
+  }
 }> {
   const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
   if (!openaiApiKey) {
@@ -87,7 +106,16 @@ URL: ${url}
   }
 
   try {
-    return JSON.parse(result.choices[0].message.content)
+    const parsed = JSON.parse(result.choices[0].message.content)
+    // Add usage data if available
+    if (result.usage) {
+      parsed.usage = {
+        prompt_tokens: result.usage.prompt_tokens,
+        completion_tokens: result.usage.completion_tokens,
+        total_tokens: result.usage.total_tokens
+      }
+    }
+    return parsed
   } catch {
     throw new Error('Failed to parse OpenAI response as JSON')
   }
@@ -143,17 +171,65 @@ serve(async (req) => {
       })
       .eq('id', payload.bookmark_id)
 
-    let llmResult: {summary: string, category: string, tags: string[]}
+    let llmResult: {summary: string, category: string, tags: string[], usage?: any}
     
     try {
+      // Check cost limits before processing
+      const { data: canProcess } = await supabase
+        .rpc('check_daily_cost_limit')
+      
+      if (!canProcess) {
+        return new Response(
+          JSON.stringify({ 
+            bookmark_id: payload.bookmark_id,
+            status: 'failed',
+            error_message: 'Daily cost limit reached'
+          } as LLMProcessResponse),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' }}
+        )
+      }
+
       // Call OpenAI API
       llmResult = await callOpenAI(
         payload.content || '',
         payload.title || payload.url,
         payload.url
       )
+      
+      // Record cost if usage data is available
+      if (llmResult.usage) {
+        const cost = calculateCost('gpt-4o-mini', llmResult.usage.prompt_tokens, llmResult.usage.completion_tokens)
+        
+        await supabase
+          .from('llm_costs')
+          .insert({
+            bookmark_id: payload.bookmark_id,
+            model: 'gpt-4o-mini',
+            prompt_tokens: llmResult.usage.prompt_tokens,
+            completion_tokens: llmResult.usage.completion_tokens,
+            total_tokens: llmResult.usage.total_tokens,
+            cost_usd: cost,
+            request_type: 'summarization',
+            success: true
+          })
+      }
     } catch (openaiError) {
       console.error('OpenAI API error:', openaiError)
+      
+      // Record failed attempt in costs table
+      await supabase
+        .from('llm_costs')
+        .insert({
+          bookmark_id: payload.bookmark_id,
+          model: 'gpt-4o-mini',
+          prompt_tokens: 0,
+          completion_tokens: 0,
+          total_tokens: 0,
+          cost_usd: 0,
+          request_type: 'summarization',
+          success: false,
+          error_message: openaiError.message
+        })
       
       // Update bookmark with failed status
       await supabase

@@ -343,6 +343,92 @@ paths:
                     type: string
                     example: "Reprocessing queued"
 
+  # LLM Processing
+  /llm/process:
+    post:
+      tags: [LLM Processing]
+      summary: Process bookmark with LLM for summarization and categorization
+      operationId: processBookmarkWithLLM
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bookmark_id
+                - url
+              properties:
+                bookmark_id:
+                  type: string
+                  format: uuid
+                  description: ID of the bookmark to process
+                  example: "59e7f8bf-6a88-49f1-82d9-f517215ec720"
+                url:
+                  type: string
+                  format: uri
+                  description: URL of the bookmark
+                  example: "https://supabase.com/docs/guides/functions"
+                title:
+                  type: string
+                  description: Title of the bookmark (optional)
+                  example: "Supabase Edge Functions Guide"
+                content:
+                  type: string
+                  description: Content to process (optional)
+                  example: "Supabase Edge Functions provide a serverless compute environment..."
+      responses:
+        200:
+          description: LLM processing completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookmark_id:
+                    type: string
+                    format: uuid
+                    example: "59e7f8bf-6a88-49f1-82d9-f517215ec720"
+                  summary:
+                    type: string
+                    description: Generated summary in Japanese
+                    example: "Supabase Edge Functionsは、カスタムビジネスロジックを実行するためのサーバーレスコンピューティング環境を提供します。"
+                  category:
+                    type: string
+                    enum: [tech, news, blog, video, other]
+                    example: "tech"
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example: ["Supabase", "Edge Functions", "サーバーレス"]
+                  status:
+                    type: string
+                    enum: [processing, done, failed]
+                    example: "done"
+                  cost:
+                    type: number
+                    format: float
+                    description: Processing cost in USD (optional)
+                    example: 0.002
+        500:
+          description: LLM processing failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookmark_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [failed]
+                    example: "failed"
+                  error_message:
+                    type: string
+                    example: "OpenAI API error: Rate limit exceeded"
+
   /bookmarks/export:
     post:
       tags: [Bookmarks]
