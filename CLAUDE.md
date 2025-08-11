@@ -112,6 +112,40 @@ open ios/BookmarkApp/BookmarkApp.xcodeproj
 - Cross-platform compatibility verified
 - Real-world testing completed successfully
 
+## Multi-Device Development Workflow
+
+### Git Branch Strategy
+This project uses a multi-device development workflow optimized for separate development and testing environments:
+
+```
+main ← Production releases (Protected)
+ ↑
+develop ← Integration branch for completed features  
+ ↑                 ↑
+dev-mac ← Development Mac  test-mac ← Testing Mac
+ ↑                 ↑
+feature/xxx        hotfix/xxx
+```
+
+#### Branch Details
+- **main**: Production-ready releases, protected branch, PR required
+- **develop**: Integration branch for completed features before production
+- **dev-mac**: Development Mac for iOS Simulator, Web PWA, Backend development
+- **test-mac**: Testing Mac for iPhone device testing, Share Extension real device testing
+
+### Development Environment Setup
+- **Development Mac**: Primary development with iOS Simulator and web development
+- **Testing Mac**: Real device testing with iPhone, Personal Team configuration
+- **Workflow**: Separate branches with device-specific configurations, merge via develop branch
+
+### Git Workflow Rules
+See `GIT運用ルール.md` for comprehensive workflow documentation including:
+- Daily development flow for each device
+- Configuration file management strategy
+- Commit message conventions with device prefixes
+- Pull request templates for integration
+- Conflict resolution strategies for device-specific settings
+
 ## Post-MVP Enhancement Opportunities
 
 ### Potential Next Development Phases
@@ -127,3 +161,4 @@ open ios/BookmarkApp/BookmarkApp.xcodeproj
 - **Scalability**: Architecture supports multiple users
 - **Security**: WebAuthn passkey authentication, secure API design
 - **Maintenance**: Comprehensive documentation and error handling
+- **Multi-Device Development**: Git workflow optimized for separate development/testing environments
