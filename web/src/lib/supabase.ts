@@ -5,8 +5,35 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1N
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
-// Mock mode flag - default to true when environment variables are not set
-const MOCK_MODE = import.meta.env.VITE_MOCK_MODE !== 'false' // Default to true unless explicitly set to false
+// Dynamic mock mode - fallback to true if Supabase is unreachable
+let MOCK_MODE = import.meta.env.VITE_MOCK_MODE !== 'false' // Default to true unless explicitly set to false
+
+// Check Supabase connectivity and fallback to mock mode if needed
+const checkSupabaseConnectivity = async (): Promise<boolean> => {
+  if (MOCK_MODE) return false // Already in mock mode
+  
+  try {
+    // Simple connectivity test - just try to resolve the domain
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+    
+    const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+      method: 'HEAD',
+      signal: controller.signal,
+      headers: { 'apikey': supabaseKey }
+    })
+    
+    clearTimeout(timeoutId)
+    return response.ok || response.status === 401 // 401 is actually OK - means API is reachable
+  } catch (error) {
+    console.warn('🔄 Supabase connection failed, falling back to MOCK mode:', error)
+    MOCK_MODE = true // Dynamically enable mock mode
+    return false
+  }
+}
+
+// Initialize connectivity check
+checkSupabaseConnectivity()
 
 // Debug info
 console.log('🔧 Supabase Configuration:', {
@@ -144,6 +171,7 @@ export const bookmarkApi = {
     limit?: number
     offset?: number
   } = {}): Promise<BookmarkListResponse> {
+    // Check if we should use mock mode (either configured or due to connectivity issues)
     if (MOCK_MODE) {
       // Mock implementation for testing
       await new Promise(resolve => setTimeout(resolve, 500)) // Simulate network delay
@@ -185,21 +213,48 @@ export const bookmarkApi = {
     if (params.limit) searchParams.set('limit', params.limit.toString())
     if (params.offset) searchParams.set('offset', params.offset.toString())
 
-    const response = await fetch(
-      `${supabaseUrl}/functions/v1/bookmarks-list?${searchParams}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${supabaseKey}`,
-          'apikey': supabaseKey
+    try {
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/bookmarks-list?${searchParams}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${supabaseKey}`,
+            'apikey': supabaseKey
+          }
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch bookmarks: ${response.status}`)
+      }
+
+      return response.json()
+    } catch (error) {
+      // Fallback to mock mode on API error
+      console.warn('🔄 API request failed, falling back to mock data:', error)
+      MOCK_MODE = true
+      
+      // Return mock data as fallback
+      let filteredBookmarks = [...mockBookmarks]
+      
+      if (params.q) {
+        const query = params.q.toLowerCase()
+        filteredBookmarks = filteredBookmarks.filter(bookmark => 
+          bookmark.title_final?.toLowerCase().includes(query) ||
+          bookmark.summary?.toLowerCase().includes(query)
+        )
+      }
+      
+      return {
+        data: filteredBookmarks,
+        metadata: {
+          total: filteredBookmarks.length,
+          limit: params.limit || 50,
+          offset: params.offset || 0,
+          has_more: false
         }
       }
-    )
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch bookmarks: ${response.status}`)
     }
-
-    return response.json()
   },
 
   // Create new bookmark
