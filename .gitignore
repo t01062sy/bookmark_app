@@ -91,3 +91,39 @@ backups/secrets/
 
 # Claude Code
 .claude/
+
+# Multi-Device Development Settings
+# Each development environment maintains its own configurations
+
+# iOS Xcode User Settings (device-specific)
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Device-specific Bundle IDs and Team Settings
+# These will be managed per branch:
+# dev-mac branch: com.devmac.BookmarkApp
+# test-mac branch: com.testmac.BookmarkApp
+# Uncomment the line below to ignore project.pbxproj completely:
+# *.xcodeproj/project.pbxproj
+
+# Device-specific configuration files
+config/local-*.json
+config/device-*.plist
+*-local.config
+*.local.xcconfig
+
+# Development Database Files
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Web Development
+web/.env.local
+web/.env.*.local
+web/dist/
+web/build/
+
+# iOS Simulator specific
+ios/BookmarkApp/BookmarkApp.app.dSYM/
+ios/BookmarkApp/DerivedData/
