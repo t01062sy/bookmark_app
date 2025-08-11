@@ -186,7 +186,17 @@ function App() {
             disabled={creating}
             required
           />
-          <button type="submit" disabled={creating || !newUrl.trim()}>
+          <button 
+            type="submit" 
+            disabled={creating || !newUrl.trim()}
+            onClick={(e) => {
+              // iOS Safari compatibility: ensure form submission works
+              if (!newUrl.trim()) {
+                e.preventDefault()
+                return
+              }
+            }}
+          >
             {creating ? '⏳ Processing...' : '➕ Add'}
           </button>
         </form>

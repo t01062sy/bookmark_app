@@ -102,6 +102,10 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  /* iOS Safari touch compatibility */
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .add-bookmark button:hover:not(:disabled) {

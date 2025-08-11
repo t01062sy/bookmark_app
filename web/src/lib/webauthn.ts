@@ -63,10 +63,10 @@ export const webAuthnService = {
         { alg: -257, type: 'public-key' }, // RS256
       ],
       authenticatorSelection: {
-        authenticatorAttachment: 'platform', // Use platform authenticator (Touch ID, Face ID, Windows Hello)
+        // Remove platform restriction for cross-browser compatibility
         requireResidentKey: true,
         residentKey: 'required',
-        userVerification: 'required',
+        userVerification: 'preferred', // Changed from 'required' to 'preferred'
       },
       timeout: 60000,
       attestation: 'none', // We don't need attestation for this use case
@@ -106,7 +106,7 @@ export const webAuthnService = {
     return {
       challenge: btoa(String.fromCharCode(...challenge)),
       rpId: RP_ID,
-      userVerification: 'required',
+      userVerification: 'preferred', // Changed from 'required' to 'preferred'
       timeout: 60000,
       // In production, you'd fetch allowed credentials from the backend
       // For testing, we'll use credentials from localStorage
