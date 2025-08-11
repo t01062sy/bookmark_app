@@ -90,14 +90,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('WebAuthn is not supported in your browser. Please use a modern browser.')
       }
 
-      // Authenticate with WebAuthn
-      await webAuthnService.authenticate()
-
-      // Get stored user info
+      // Get stored user info first to check if user exists
       const storedUser = localStorage.getItem('bookmark_app_user')
       if (!storedUser) {
-        throw new Error('No user found. Please register first.')
+        // More helpful error message
+        throw new Error('No account found in this browser. Please create a new account first.')
       }
+
+      // Authenticate with WebAuthn
+      await webAuthnService.authenticate()
 
       const user = JSON.parse(storedUser)
       

@@ -163,6 +163,17 @@ export function AuthScreen() {
               {error && (
                 <div className="auth-error">
                   ❌ {error}
+                  {error.includes('No account found') && (
+                    <div style={{ marginTop: '10px' }}>
+                      <button 
+                        className="auth-button secondary"
+                        onClick={() => setMode('register')}
+                        style={{ marginTop: '10px' }}
+                      >
+                        Create New Account Instead
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 

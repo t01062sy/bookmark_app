@@ -63,10 +63,10 @@ export const webAuthnService = {
         { alg: -257, type: 'public-key' }, // RS256
       ],
       authenticatorSelection: {
-        // Remove platform restriction for cross-browser compatibility
-        requireResidentKey: true,
-        residentKey: 'required',
-        userVerification: 'preferred', // Changed from 'required' to 'preferred'
+        // Maximum compatibility for cross-browser support
+        requireResidentKey: false,  // Changed from true to false for compatibility
+        residentKey: 'preferred',   // Changed from 'required' to 'preferred'
+        userVerification: 'preferred', // Keep as 'preferred'
       },
       timeout: 60000,
       attestation: 'none', // We don't need attestation for this use case
