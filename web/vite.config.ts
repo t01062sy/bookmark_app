@@ -32,28 +32,41 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Completely exclude all Supabase URLs from Service Worker
+        navigateFallbackDenylist: [
+          /^https:\/\/.*\.supabase\.co\//
+        ],
+        // Ignore API requests completely in Service Worker
+        ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
         runtimeCaching: [
           {
-            // API requests should always hit the network first
-            urlPattern: /^https:\/\/ieururvmlrgkxfetfnlnp\.supabase\.co\/functions\/v1\/.*/i,
-            handler: 'NetworkOnly', // Changed from NetworkFirst to NetworkOnly
+            // Only cache local static assets and CDN resources
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
             options: {
-              cacheName: 'api-cache'
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              }
             }
           },
           {
-            // Cache static Supabase assets (if any)
-            urlPattern: /^https:\/\/ieururvmlrgkxfetfnlnp\.supabase\.co\/.*\.(js|css|woff2|png|jpg|svg)$/i,
+            // Cache other external static assets
+            urlPattern: /^https:\/\/.*\.(js|css|woff2?|png|jpg|svg|gif|ico)$/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'supabase-assets',
+              cacheName: 'external-assets',
               expiration: {
-                maxEntries: 50,
+                maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
               }
             }
           }
-        ]
+        ],
+        // Skip waiting and claim clients immediately for updates
+        skipWaiting: true,
+        clientsClaim: true
       },
       devOptions: {
         enabled: true
