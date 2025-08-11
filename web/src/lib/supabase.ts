@@ -5,8 +5,16 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1N
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
-// Mock mode flag - set to true when Supabase is not available
-const MOCK_MODE = import.meta.env.VITE_MOCK_MODE === 'true'
+// Mock mode flag - default to true when environment variables are not set
+const MOCK_MODE = import.meta.env.VITE_MOCK_MODE !== 'false' // Default to true unless explicitly set to false
+
+// Debug info
+console.log('🔧 Supabase Configuration:', {
+  url: supabaseUrl,
+  mockMode: MOCK_MODE,
+  env: import.meta.env.VITE_ENVIRONMENT,
+  viteMode: import.meta.env.VITE_MOCK_MODE
+})
 
 // Mock data for testing
 const mockBookmarks: Bookmark[] = [

@@ -34,13 +34,22 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
+            // API requests should always hit the network first
             urlPattern: /^https:\/\/ieururvmlrgkxfetfnlnp\.supabase\.co\/functions\/v1\/.*/i,
-            handler: 'NetworkFirst',
+            handler: 'NetworkOnly', // Changed from NetworkFirst to NetworkOnly
             options: {
-              cacheName: 'api-cache',
+              cacheName: 'api-cache'
+            }
+          },
+          {
+            // Cache static Supabase assets (if any)
+            urlPattern: /^https:\/\/ieururvmlrgkxfetfnlnp\.supabase\.co\/.*\.(js|css|woff2|png|jpg|svg)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'supabase-assets',
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
               }
             }
           }
