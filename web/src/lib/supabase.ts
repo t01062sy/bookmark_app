@@ -119,6 +119,10 @@ export interface SemanticSearchResponse {
   total_results: number
   processing_time_ms: number
   embedding_cost_usd: number
+  search_info?: {
+    bm25_results: number
+    semantic_results: number
+  }
 }
 
 // API helper functions

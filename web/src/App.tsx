@@ -28,7 +28,7 @@ function App() {
           similarity_threshold: 0.3
         })
         setSemanticResults(response)
-        setBookmarks(response.results.map(result => ({
+        setBookmarks(response.results.map((result: any) => ({
           id: result.id,
           url: result.url,
           title_final: result.title,
@@ -47,7 +47,7 @@ function App() {
           limit: 20
         })
         setSemanticResults(response)
-        setBookmarks(response.results.map(result => ({
+        setBookmarks(response.results.map((result: any) => ({
           id: result.id,
           url: result.url,
           title_final: result.title,
@@ -68,7 +68,7 @@ function App() {
           semantic_weight: 0.4
         })
         setSemanticResults(response)
-        setBookmarks(response.results.map(result => ({
+        setBookmarks(response.results.map((result: any) => ({
           id: result.id,
           url: result.url,
           title_final: result.title,
