@@ -236,8 +236,8 @@ function App() {
             {searchType === 'semantic' && `🔍 Semantic search for "${semanticResults.query}" - ${semanticResults.total_results} results in ${semanticResults.processing_time_ms}ms${semanticResults.embedding_cost_usd ? ` (Cost: $${semanticResults.embedding_cost_usd.toFixed(8)})` : ''}`}
             {searchType === 'fulltext' && `📝 BM25 full-text search for "${semanticResults.query}" - ${semanticResults.total_results} results in ${semanticResults.processing_time_ms}ms`}
             {searchType === 'hybrid' && `🚀 Hybrid search (BM25 + Vector) for "${semanticResults.query}" - ${semanticResults.total_results} results in ${semanticResults.processing_time_ms}ms`}
-            {semanticResults.search_info && searchType === 'hybrid' && semanticResults.search_info.bm25_results && (
-              <span> (BM25: {semanticResults.search_info.bm25_results}, Semantic: {semanticResults.search_info.semantic_results})</span>
+            {(semanticResults as any).search_info && searchType === 'hybrid' && (semanticResults as any).search_info.bm25_results && (
+              <span> (BM25: {(semanticResults as any).search_info.bm25_results}, Semantic: {(semanticResults as any).search_info.semantic_results})</span>
             )}
           </p>
         </div>
